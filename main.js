@@ -6,9 +6,10 @@ const t = THREE;
 let camera, scene, renderer, world;
 let near, far;
 let pixR = window.devicePixelRatio ? window.devicePixelRatio : 1;
-let cubes = [];
+let circles = [];
 let sceneOffsetTarget = {x: 0, y: 0};
 let sceneOffset = {x: 0, y: 0};
+const loader = new THREE.TextureLoader();
 
 let today = new Date();
 today.setHours(0);
@@ -74,9 +75,13 @@ else
 		far = camera.position.z + 0.5;
 
 		scene = new t.Scene();
-		scene.background = new t.Color(0.0);
+		loader.load('https://images.pexels.com/photos/1205301/pexels-photo-1205301.jpeg' , function(texture)
+		{
+		 scene.background = texture;  //added a image as a background
+		});
+		// scene.background = new t.Color('#164863');//Background color changes
 		scene.add( camera );
-
+		
 		renderer = new t.WebGLRenderer({antialias: true, depthBuffer: true});
 		renderer.setPixelRatio(pixR);
 	    
@@ -105,35 +110,37 @@ else
 
 	function windowsUpdated ()
 	{
-		updateNumberOfCubes();
+		updateNumberOfcircles();
 	}
 
-	function updateNumberOfCubes ()
+	function updateNumberOfcircles ()
 	{
 		let wins = windowManager.getWindows();
 
-		// remove all cubes
-		cubes.forEach((c) => {
+		// remove all circles
+		circles.forEach((c) => {
 			world.remove(c);
 		})
 
-		cubes = [];
+		circles = [];
 
-		// add new cubes based on the current window setup
+		// add new circles based on the current window setup
 		for (let i = 0; i < wins.length; i++)
 		{
 			let win = wins[i];
 
 			let c = new t.Color();
-			c.setHSL(i * .1, 1.0, .5);
+			c.setHSL(i * .3, 1.0, .5);//color of the shapes
 
 			let s = 100 + i * 50;
-			let cube = new t.Mesh(new t.BoxGeometry(s, s, s), new t.MeshBasicMaterial({color: c , wireframe: true}));
-			cube.position.x = win.shape.x + (win.shape.w * .5);
-			cube.position.y = win.shape.y + (win.shape.h * .5);
+			// let circle = new t.Mesh(new t.BoxGeometry(s, s*10, s*3), new t.MeshBasicMaterial({color: c , wireframe: true}));
+			// removed the shape cube and added circle
+			let circle = new THREE.Mesh( new THREE.CircleGeometry( s,s*12 ), new t.MeshBasicMaterial({color: c , wireframe: true}));
+			circle.position.x = win.shape.x + (win.shape.w * .5);
+			circle.position.y = win.shape.y + (win.shape.h * .5);
 
-			world.add(cube);
-			cubes.push(cube);
+			world.add(circle);
+			circles.push(circle);
 		}
 	}
 
@@ -164,19 +171,19 @@ else
 		let wins = windowManager.getWindows();
 
 
-		// loop through all our cubes and update their positions based on current window positions
-		for (let i = 0; i < cubes.length; i++)
+		// loop through all our circles and update their positions based on current window positions
+		for (let i = 0; i < circles.length; i++)
 		{
-			let cube = cubes[i];
+			let circle = circles[i];
 			let win = wins[i];
 			let _t = t;// + i * .2;
 
 			let posTarget = {x: win.shape.x + (win.shape.w * .5), y: win.shape.y + (win.shape.h * .5)}
 
-			cube.position.x = cube.position.x + (posTarget.x - cube.position.x) * falloff;
-			cube.position.y = cube.position.y + (posTarget.y - cube.position.y) * falloff;
-			cube.rotation.x = _t * .5;
-			cube.rotation.y = _t * .3;
+			circle.position.x = circle.position.x + (posTarget.x - circle.position.x) * falloff;
+			circle.position.y = circle.position.y + (posTarget.y - circle.position.y) * falloff;
+			circle.rotation.x = _t * .5;
+			circle.rotation.y = _t * .3;
 		};
 
 		renderer.render(scene, camera);
